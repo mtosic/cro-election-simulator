@@ -105,7 +105,7 @@ foreach (var fileName in fileNames)
                     var county = db.Counties.FirstOrDefault(x => x.Name == countyName);
                     if (county is null)
                     {
-                        county = new County { Code = countyCode, Name = countyName, Constituency = constituency };
+                        county = new County { Code = countyCode, Name = countyName };
                         db.Counties.Add(county);
                     }
 
@@ -135,7 +135,8 @@ foreach (var fileName in fileNames)
                             Code = pollingStationCode,
                             Location = pollingStationLocation,
                             Address = pollingStationAddress,
-                            City = city
+                            City = city,
+                            Constituency = constituency
                         };
                         db.PollingStations.Add(pollingStation);
                     }

@@ -14,4 +14,6 @@ public class PollingStation
     public int InvalidVotes { get; set; }
     public int CityId { get; set; }
     public required City City { get; set; }
+    public int ConstituencyId { get; set; }
+    public required Constituency Constituency { get; set; }
 }
