@@ -25,6 +25,20 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Counties",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Counties", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Parties",
                 columns: table => new
                 {
@@ -39,22 +53,22 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Counties",
+                name: "Cities",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ConstituencyId = table.Column<int>(type: "int", nullable: false)
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CountyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Counties", x => x.Id);
+                    table.PrimaryKey("PK_Cities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Counties_Constituencies_ConstituencyId",
-                        column: x => x.ConstituencyId,
-                        principalTable: "Constituencies",
+                        name: "FK_Cities_Counties_CountyId",
+                        column: x => x.CountyId,
+                        principalTable: "Counties",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -80,26 +94,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Cities",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CountyId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Cities", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Cities_Counties_CountyId",
-                        column: x => x.CountyId,
-                        principalTable: "Counties",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PollingStations",
                 columns: table => new
                 {
@@ -114,7 +108,8 @@ namespace Infrastructure.Migrations
                     TotalVotesByBallot = table.Column<int>(type: "int", nullable: false),
                     ValidVotes = table.Column<int>(type: "int", nullable: false),
                     InvalidVotes = table.Column<int>(type: "int", nullable: false),
-                    CityId = table.Column<int>(type: "int", nullable: false)
+                    CityId = table.Column<int>(type: "int", nullable: false),
+                    ConstituencyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -123,6 +118,12 @@ namespace Infrastructure.Migrations
                         name: "FK_PollingStations_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PollingStations_Constituencies_ConstituencyId",
+                        column: x => x.ConstituencyId,
+                        principalTable: "Constituencies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -162,7 +163,7 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CandidateId = table.Column<int>(type: "int", nullable: false),
                     ElectionListId = table.Column<int>(type: "int", nullable: false),
-                    TotalVotes = table.Column<int>(type: "int", nullable: false)
+                    Total = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -201,11 +202,6 @@ namespace Infrastructure.Migrations
                 column: "CountyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Counties_ConstituencyId",
-                table: "Counties",
-                column: "ConstituencyId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ElectionLists_PartyId",
                 table: "ElectionLists",
                 column: "PartyId");
@@ -219,6 +215,11 @@ namespace Infrastructure.Migrations
                 name: "IX_PollingStations_CityId",
                 table: "PollingStations",
                 column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PollingStations_ConstituencyId",
+                table: "PollingStations",
+                column: "ConstituencyId");
         }
 
         /// <inheritdoc />
@@ -243,10 +244,10 @@ namespace Infrastructure.Migrations
                 name: "Cities");
 
             migrationBuilder.DropTable(
-                name: "Counties");
+                name: "Constituencies");
 
             migrationBuilder.DropTable(
-                name: "Constituencies");
+                name: "Counties");
         }
     }
 }

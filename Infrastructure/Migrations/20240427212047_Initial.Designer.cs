@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ElectionContext))]
-    [Migration("20240419220736_Initial")]
+    [Migration("20240427212047_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -60,7 +60,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ElectionListId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TotalVotes")
+                    b.Property<int>("Total")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -84,6 +84,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -127,16 +131,11 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ConstituencyId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConstituencyId");
 
                     b.ToTable("Counties");
                 });
@@ -207,6 +206,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ConstituencyId")
+                        .HasColumnType("int");
+
                     b.Property<int>("InvalidVotes")
                         .HasColumnType("int");
 
@@ -233,6 +235,8 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CityId");
+
+                    b.HasIndex("ConstituencyId");
 
                     b.ToTable("PollingStations");
                 });
@@ -278,17 +282,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("County");
                 });
 
-            modelBuilder.Entity("Model.County", b =>
-                {
-                    b.HasOne("Model.Constituency", "Constituency")
-                        .WithMany()
-                        .HasForeignKey("ConstituencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Constituency");
-                });
-
             modelBuilder.Entity("Model.ElectionList", b =>
                 {
                     b.HasOne("Model.Party", "Party")
@@ -316,7 +309,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Model.Constituency", "Constituency")
+                        .WithMany()
+                        .HasForeignKey("ConstituencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("City");
+
+                    b.Navigation("Constituency");
                 });
 
             modelBuilder.Entity("Model.ElectionList", b =>

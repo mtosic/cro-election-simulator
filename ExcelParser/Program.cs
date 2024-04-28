@@ -29,6 +29,9 @@ var fileNames = Directory.EnumerateFiles(folderPath, "*.xlsx");
 
 using var db = new ElectionContext();
 
+var partiesCache = new List<Party>();
+var candidatesCache = new List<Candidate>();
+
 int excelIndex = 1;
 foreach (var fileName in fileNames)
 {
@@ -37,12 +40,15 @@ foreach (var fileName in fileNames)
         WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart ?? spreadsheetDocument.AddWorkbookPart();
         var worksheetParts = workbookPart.WorksheetParts;
 
+
+        var sheetIndex = 1;
         foreach (var worksheetPart in worksheetParts)
         {
             SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
 
             //make a list of party/cantidate names and its column index in row so we can assign row data to correct party/candidate
             var partyColumnIndex = new Dictionary<int, string>();
+            var rowIndex = 1;
             foreach (Row r in sheetData.Elements<Row>())
             {
                 Party party = null;
@@ -57,11 +63,14 @@ foreach (var fileName in fileNames)
                         {
                             var partyName = ExcelHelper.GetCellValue(rowCells[i], workbookPart);
                             //check if we have party by name, if not create new one
-                            party = db.Parties.FirstOrDefault(x => x.Name == partyName);
+                            //party = db.Parties.FirstOrDefault(x => x.Name == partyName);
+                            party = partiesCache.FirstOrDefault(x => x.Name == partyName);
                             if (party is null)
                             {
                                 party = new Party { Name = partyName };
                                 db.Parties.Add(party);
+                                db.SaveChanges();
+                                partiesCache.Add(party);
                             }
                             partyColumnIndex.Add(i, partyName);
                         }
@@ -70,11 +79,14 @@ foreach (var fileName in fileNames)
                         {
                             var candidateName = ExcelHelper.GetCellValue(rowCells[i], workbookPart);
                             //check if we have candidate by name, if not create new one
-                            var candidate = db.Candidates.FirstOrDefault(x => x.Name == candidateName);
+                            //var candidate = db.Candidates.FirstOrDefault(x => x.Name == candidateName);
+                            var candidate = candidatesCache.FirstOrDefault(x => x.Name == candidateName);
                             if (candidate is null)
                             {
                                 candidate = new Candidate { Name = candidateName, Party = party };
                                 db.Candidates.Add(candidate);
+                                db.SaveChanges();
+                                candidatesCache.Add(candidate);
                             }
                             partyColumnIndex.Add(i, candidateName);
                         }
@@ -125,11 +137,10 @@ foreach (var fileName in fileNames)
                     var pollingStationName = ExcelHelper.GetCellValue(rowCells[7], workbookPart);
                     var pollingStationLocation = ExcelHelper.GetCellValue(rowCells[8], workbookPart);
                     var pollingStationAddress = ExcelHelper.GetCellValue(rowCells[9], workbookPart);
-                    //check if we have polling station, if not add it, code can be duplicated because of abroad polling stations, use name
-                    var pollingStation = db.PollingStations.FirstOrDefault(x => x.Name == pollingStationName);
-                    if (pollingStation is null)
-                    {
-                        pollingStation = new PollingStation
+                    //check if we have polling station, if not add it, code can be duplicated because of abroad polling stations, use name+code
+                    //var pollingStation = db.PollingStations.FirstOrDefault(x => x.Name == pollingStationName && x.Code == pollingStationCode);
+
+                    var pollingStation = new PollingStation
                         {
                             Name = pollingStationName,
                             Code = pollingStationCode,
@@ -138,8 +149,8 @@ foreach (var fileName in fileNames)
                             City = city,
                             Constituency = constituency
                         };
-                        db.PollingStations.Add(pollingStation);
-                    }
+                    db.PollingStations.Add(pollingStation);
+                    
 
                     //K, L, M, N, O are voting population, total votes, total votes by ballot, valid votes and invalid votes
                     var votingPopulation = ExcelHelper.GetCellValue(rowCells[10], workbookPart);
@@ -165,16 +176,17 @@ foreach (var fileName in fileNames)
                         {
                             if (i % 15 == 0)
                             {
-                                party = db.Parties.FirstOrDefault(x => x.Name == partyOrCandidateName);
+                                //party = db.Parties.FirstOrDefault(x => x.Name == partyOrCandidateName);
+                                party = partiesCache.FirstOrDefault(x => x.Name == partyOrCandidateName);
                                 if (party is not null)
                                 {
                                     electionList = new ElectionList { Party = party, PollingStation = pollingStation, TotalVotes = int.Parse(cellValue), CandidateVotes = new List<CandidateVote>() };
-
                                 }
                             }
                             else
                             {
-                                var candidate = db.Candidates.FirstOrDefault(x => x.Name == partyOrCandidateName);
+                                //var candidate = db.Candidates.FirstOrDefault(x => x.Name == partyOrCandidateName);
+                                var candidate = candidatesCache.FirstOrDefault(x => x.Name == partyOrCandidateName);
                                 if (candidate is not null)
                                 {
                                     var candidateVote = new CandidateVote { Candidate = candidate, ElectionList = electionList, Total = int.Parse(cellValue) };
@@ -191,8 +203,11 @@ foreach (var fileName in fileNames)
                     }
                     db.SaveChanges();
                 }
+                Console.WriteLine($"Parsed row {rowIndex} for sheet {sheetIndex}, excel: {excelIndex}");
+                rowIndex++;
             }
-            Console.WriteLine("Sheet processing finished");
+            Console.WriteLine("Sheet processing finished for sheet: " + sheetIndex);
+            sheetIndex++;
         }
         Console.WriteLine("Parsing done for excel: " + excelIndex);
         excelIndex++;

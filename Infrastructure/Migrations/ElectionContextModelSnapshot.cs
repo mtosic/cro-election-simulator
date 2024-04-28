@@ -128,16 +128,11 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ConstituencyId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConstituencyId");
 
                     b.ToTable("Counties");
                 });
@@ -208,6 +203,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ConstituencyId")
+                        .HasColumnType("int");
+
                     b.Property<int>("InvalidVotes")
                         .HasColumnType("int");
 
@@ -234,6 +232,8 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CityId");
+
+                    b.HasIndex("ConstituencyId");
 
                     b.ToTable("PollingStations");
                 });
@@ -279,17 +279,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("County");
                 });
 
-            modelBuilder.Entity("Model.County", b =>
-                {
-                    b.HasOne("Model.Constituency", "Constituency")
-                        .WithMany()
-                        .HasForeignKey("ConstituencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Constituency");
-                });
-
             modelBuilder.Entity("Model.ElectionList", b =>
                 {
                     b.HasOne("Model.Party", "Party")
@@ -317,7 +306,15 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Model.Constituency", "Constituency")
+                        .WithMany()
+                        .HasForeignKey("ConstituencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("City");
+
+                    b.Navigation("Constituency");
                 });
 
             modelBuilder.Entity("Model.ElectionList", b =>
