@@ -31,6 +31,9 @@ using var db = new ElectionContext();
 
 var partiesCache = new List<Party>();
 var candidatesCache = new List<Candidate>();
+var constituenciesCache = new List<Constituency>();
+var countyCache = new List<County>();
+var cityCache = new List<City>();
 
 int excelIndex = 1;
 foreach (var fileName in fileNames)
@@ -40,15 +43,15 @@ foreach (var fileName in fileNames)
         WorkbookPart workbookPart = spreadsheetDocument.WorkbookPart ?? spreadsheetDocument.AddWorkbookPart();
         var worksheetParts = workbookPart.WorksheetParts;
 
-
         var sheetIndex = 1;
         foreach (var worksheetPart in worksheetParts)
         {
+            Console.WriteLine($"Sheet processing starting for sheet: {sheetIndex}, excel: {excelIndex}");
             SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
 
             //make a list of party/cantidate names and its column index in row so we can assign row data to correct party/candidate
             var partyColumnIndex = new Dictionary<int, string>();
-            var rowIndex = 1;
+            var rowCount = 0;
             foreach (Row r in sheetData.Elements<Row>())
             {
                 Party party = null;
@@ -91,7 +94,6 @@ foreach (var fileName in fileNames)
                             partyColumnIndex.Add(i, candidateName);
                         }
                     }
-                    db.SaveChanges();
                 }
                 else
                 {
@@ -100,7 +102,8 @@ foreach (var fileName in fileNames)
                     //excel has empty rows at the end, if we have empty cell in first column, break
                     if (String.IsNullOrEmpty(constituencyCode)) break;
 
-                    var constituency = db.Constituencies.FirstOrDefault(x => x.Code == constituencyCode);
+                    //var constituency = db.Constituencies.FirstOrDefault(x => x.Code == constituencyCode);
+                    var constituency = constituenciesCache.FirstOrDefault(x => x.Code == constituencyCode);
                     //if we don't have it, create new one and save it
                     if (constituency is null)
                     {
@@ -108,28 +111,36 @@ foreach (var fileName in fileNames)
                         var constituencyName = ExcelHelper.GetCellValue(rowCells[1], workbookPart);
                         constituency = new Constituency { Name = constituencyName, Code = constituencyCode };
                         db.Constituencies.Add(constituency);
+                        db.SaveChanges();
+                        constituenciesCache.Add(constituency);
                     }
 
                     //C and D is county code and name
                     var countyCode = ExcelHelper.GetCellValue(rowCells[2], workbookPart);
                     var countyName = ExcelHelper.GetCellValue(rowCells[3], workbookPart);
                     //check if we have county, if not add it, code can be duplicated with abroad "county", get by name
-                    var county = db.Counties.FirstOrDefault(x => x.Name == countyName);
+                    //var county = db.Counties.FirstOrDefault(x => x.Name == countyName);
+                    var county = countyCache.FirstOrDefault(x => x.Name == countyName);
                     if (county is null)
                     {
                         county = new County { Code = countyCode, Name = countyName };
                         db.Counties.Add(county);
+                        db.SaveChanges();
+                        countyCache.Add(county);
                     }
 
                     //E and F is city type and name
                     var cityType = ExcelHelper.GetCellValue(rowCells[4], workbookPart);
                     var cityName = ExcelHelper.GetCellValue(rowCells[5], workbookPart);
                     //check if we have city, if not add it
-                    var city = db.Cities.FirstOrDefault(x => x.Name == cityName);
+                    //var city = db.Cities.FirstOrDefault(x => x.Name == cityName);
+                    var city = cityCache.FirstOrDefault(x => x.Name == cityName);
                     if (city is null)
                     {
                         city = new City { Name = cityName, Type = cityType, County = county };
                         db.Cities.Add(city);
+                        db.SaveChanges();
+                        cityCache.Add(city);
                     }
 
                     //G, H, I and J are polling station code, name, location and address
@@ -137,8 +148,6 @@ foreach (var fileName in fileNames)
                     var pollingStationName = ExcelHelper.GetCellValue(rowCells[7], workbookPart);
                     var pollingStationLocation = ExcelHelper.GetCellValue(rowCells[8], workbookPart);
                     var pollingStationAddress = ExcelHelper.GetCellValue(rowCells[9], workbookPart);
-                    //check if we have polling station, if not add it, code can be duplicated because of abroad polling stations, use name+code
-                    //var pollingStation = db.PollingStations.FirstOrDefault(x => x.Name == pollingStationName && x.Code == pollingStationCode);
 
                     var pollingStation = new PollingStation
                         {
@@ -149,8 +158,7 @@ foreach (var fileName in fileNames)
                             City = city,
                             Constituency = constituency
                         };
-                    db.PollingStations.Add(pollingStation);
-                    
+                    db.PollingStations.Add(pollingStation);                    
 
                     //K, L, M, N, O are voting population, total votes, total votes by ballot, valid votes and invalid votes
                     var votingPopulation = ExcelHelper.GetCellValue(rowCells[10], workbookPart);
@@ -200,13 +208,13 @@ foreach (var fileName in fileNames)
                             }
 
                         }
-                    }
-                    db.SaveChanges();
+                    }                    
                 }
-                Console.WriteLine($"Parsed row {rowIndex} for sheet {sheetIndex}, excel: {excelIndex}");
-                rowIndex++;
+                db.SaveChanges();
+                //Console.WriteLine($"Parsed row {rowIndex} for sheet {sheetIndex}, excel: {excelIndex}");
+                rowCount++;
             }
-            Console.WriteLine("Sheet processing finished for sheet: " + sheetIndex);
+            Console.WriteLine($"Sheet processing finished for sheet: {sheetIndex}, excel: {excelIndex}, row count: {rowCount}");
             sheetIndex++;
         }
         Console.WriteLine("Parsing done for excel: " + excelIndex);
