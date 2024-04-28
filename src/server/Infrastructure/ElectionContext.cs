@@ -3,12 +3,16 @@ using Model;
 
 namespace Infrastructure;
 
-public class ElectionContext: DbContext
+public class ElectionContext : DbContext
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public ElectionContext(DbContextOptions<ElectionContext> options)
+    : base(options)
     {
-        optionsBuilder.UseSqlServer(@"Server=.;Database=Izbori2024;Trusted_Connection=True;MultipleActiveResultSets=True;Encrypt=False;");
     }
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    optionsBuilder.UseSqlServer(@"Server=.;Database=Izbori2024;Trusted_Connection=True;MultipleActiveResultSets=True;Encrypt=False;");
+    //}
 
     public DbSet<Constituency> Constituencies { get; set; }
     public DbSet<County> Counties { get; set; }
