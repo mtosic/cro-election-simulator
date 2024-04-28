@@ -17,6 +17,7 @@ public class ElectionContext: DbContext
     public DbSet<Candidate> Candidates { get; set; }
     public DbSet<ElectionList> ElectionLists { get; set; }
     public DbSet<PollingStation> PollingStations { get; set; }
+    public DbSet<ConstituencySimulation> ConstituencySimulations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +26,10 @@ public class ElectionContext: DbContext
             .WithMany(b => b.CandidateVotes)
             .HasForeignKey(p => p.ElectionListId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<ConstituencySimulation>()
+            .HasKey(cs => new { cs.SimulationId, cs.ConstituencyNumber });
+
     }
 
 }
