@@ -3,6 +3,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ElectionContext))]
-    partial class ElectionContextModelSnapshot : ModelSnapshot
+    [Migration("20240428155802_VotingSimulation")]
+    partial class VotingSimulation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,6 +282,43 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ConstituencyId");
 
                     b.ToTable("PollingStations");
+                });
+
+            modelBuilder.Entity("Model.VotingSimulation", b =>
+                {
+                    b.Property<int>("SimulationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConstituencyNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PartyName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConstituencyDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ConstituencyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SimulationName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalVotes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Votes")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("VotesPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("SimulationId", "ConstituencyNumber", "PartyName");
+
+                    b.ToTable("VotingSimulations");
                 });
 
             modelBuilder.Entity("Model.Candidate", b =>

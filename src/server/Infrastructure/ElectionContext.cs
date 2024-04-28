@@ -18,6 +18,7 @@ public class ElectionContext: DbContext
     public DbSet<ElectionList> ElectionLists { get; set; }
     public DbSet<PollingStation> PollingStations { get; set; }
     public DbSet<ConstituencySimulation> ConstituencySimulations { get; set; }
+    public DbSet<VotingSimulation> VotingSimulations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,6 +30,9 @@ public class ElectionContext: DbContext
 
         modelBuilder.Entity<ConstituencySimulation>()
             .HasKey(cs => new { cs.SimulationId, cs.ConstituencyNumber });
+
+        modelBuilder.Entity<VotingSimulation>()
+            .HasKey(vs => new { vs.SimulationId, vs.ConstituencyNumber, vs.PartyName });
 
     }
 
