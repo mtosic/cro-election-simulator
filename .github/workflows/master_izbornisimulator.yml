@@ -37,4 +37,4 @@ jobs:
           app-name: 'izbornisimulator'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_47BCD9F1660F4445B0C97EE421490726 }}
-          package: src/client/cro-election-simulator/dist/cro-election-simulator
+          package: src/client/cro-election-simulator/dist/cro-election-simulator/browser
