@@ -4,11 +4,14 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - izbornisimulatorapi
 
 on:
-  push:
-    branches:
-      - master
+#  push:
+#    branches:
+#      - master
   workflow_dispatch:
-
+defaults:
+  run:
+    working-directory: .src/server/API
+    
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,26 +30,7 @@ jobs:
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: .net-app
-
+        
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -54,4 +38,4 @@ jobs:
           app-name: 'izbornisimulatorapi'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5A7FEFEAE21A48738571A56130654B58 }}
-          package: .
+          package: ${{env.DOTNET_ROOT}}/myapp
