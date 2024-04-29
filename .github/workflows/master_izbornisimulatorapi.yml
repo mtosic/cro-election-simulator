@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 defaults:
   run:
-    working-directory: .src/server/API
+    working-directory: ./src/server/API
     
 jobs:
   build:
