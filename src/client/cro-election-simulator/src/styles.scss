@@ -35,6 +35,23 @@ $cro-election-simulator-theme: mat.define-light-theme((
 // that you are using.
 @include mat.all-component-themes($cro-election-simulator-theme);
 
+
+// @use '@angular/material-experimental' as matx;
+
+// $theme: matx.define-theme((
+//   color: (
+//     theme-type: dark,
+//     primary: matx.$m3-violet-palette,
+//   ),
+//   typography: (
+//     brand-family: 'Helvetica Neue',
+//     bold-weight: 900
+//   ),
+//   density: (
+//     scale: -1
+//   )
+// ));
+
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }

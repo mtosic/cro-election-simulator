@@ -17,9 +17,15 @@ public class SimulationController : ControllerBase
         db = context;
     }
 
-    [HttpGet(Name = "ConstituencySimulations")]
-    public IEnumerable<ConstituencySimulation> GetConstituencySimulations()
+    [HttpGet("Constituencies")]
+    public IEnumerable<ConstituencySimulation> GetConstituencies()
     {
         return db.ConstituencySimulations.ToList();
+    }
+
+    [HttpGet("Votes")]
+    public IEnumerable<VotingSimulation> GetVotes()
+    {
+        return db.VotingSimulations.ToList();
     }
 }

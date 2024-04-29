@@ -13,7 +13,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ElectionContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("ElectionContext")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
