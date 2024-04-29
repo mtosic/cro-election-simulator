@@ -46,7 +46,7 @@ export class AppComponent {
   ngOnInit() {
     this.simulationService.getConstituencies().subscribe(constituencySimulations => {
       this.constituencySimulations = constituencySimulations;
-      // console.log(this.constituencySimulations);
+      //console.log(this.constituencySimulations);
       this.simulations = this.constituencySimulations
         .map(constituency => ({
           id: constituency.simulationId,
@@ -146,11 +146,11 @@ export class AppComponent {
       };
     });
     this.partyResults.sort((a, b) => b.total - a.total);
+    // console.log(votes);
     // console.log(this.partyResults);
   }
 
   get constituenciesFiltered() {
     return this.constituencySimulations.filter(constituency => constituency.simulationId === this.form.value.simulationId);
   }
-
 }

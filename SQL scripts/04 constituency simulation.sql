@@ -2,8 +2,8 @@
 --SimulationId, SimulationName, ConstituencyOrdinal, ConstituencyName, Constituency description, VotingPopulation, TotalVotes, TotalVotesByBallot, ValidVotes, InvalidVotes, NumberOfMandates
 -- 1, DIP, 1, I izborna jedinica, I IJ by HDZ gerrymandering, 350 000, 200 000, 199 000, 198 500, 198 500, 500
 --DIP simulation
-INSERT INTO dbo.ConstituencySimulations([SimulationId], [ConstituencyNumber], [SimulationName], [ConstituencyDescription], [VotingPopulation], [TotalVotes], [TotalVotesByBallot], [ValidVotes], [InvalidVotes], [NumberOfMandates])
-con
+INSERT INTO dbo.ConstituencySimulations([SimulationId], [SimulationName], [ConstituencyNumber], [ConstituencyName], [ConstituencyDescription], [VotingPopulation], [TotalVotes], [TotalVotesByBallot], [ValidVotes], [InvalidVotes], [NumberOfMandates])
+SELECT
 	1 AS SimulationId,
 	'DIP' AS SimulationName,
 	const.Id as ConstituencyNumber,
@@ -24,6 +24,7 @@ ORDER by
 	const.Id
 
 --GONGov model prema registru biraèa
+INSERT INTO dbo.ConstituencySimulations([SimulationId], [SimulationName], [ConstituencyNumber], [ConstituencyName], [ConstituencyDescription], [VotingPopulation], [TotalVotes], [TotalVotesByBallot], [ValidVotes], [InvalidVotes], [NumberOfMandates])
 SELECT
 	2 AS SimulationId,
 	'GONG registar biraèa' AS SimulationName,
@@ -55,6 +56,7 @@ ORDER by
 	gong.GongConstituencyNumber
 
 --GONGov model prema popisu stanovništva
+INSERT INTO dbo.ConstituencySimulations([SimulationId], [SimulationName], [ConstituencyNumber], [ConstituencyName], [ConstituencyDescription], [VotingPopulation], [TotalVotes], [TotalVotesByBallot], [ValidVotes], [InvalidVotes], [NumberOfMandates])
 SELECT
 	3 AS SimulationId,
 	'GONG popis stanovništva' AS SimulationName,
@@ -132,6 +134,8 @@ GROUP BY
 	gong.GongConstituencyNumber, gong_const.CountyNames
 ORDER by 
 	PARSENAME(SUM(CAST(ps.VotingPopulation AS DECIMAL(10, 2))) / (SELECT SUM(CAST(VotingPopulation AS DECIMAL(10, 2))) FROM dbo.PollingStations) * 140, 1) DESC
+
+--
 
 
 

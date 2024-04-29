@@ -1,4 +1,5 @@
-<header>Izborni simulator - dosta vam je izbornih jedinica u HDZ kuhinji? Ubacite prave sastojke i napravite savršeno izbalansirano jelo</header>
+<header>Izborni simulator - dosta vam je izbornih jedinica u HDZ kuhinji? Ubacite prave sastojke i napravite savršeno
+  izbalansirano jelo</header>
 <main class="main">
   <div class="content">
     <div class="left-side">
@@ -29,7 +30,7 @@
           <tr>
             <th>Stranka</th>
             @for(constituency of constituenciesFiltered; track constituency; let idx = $index) {
-              <th>{{constituency.constituencyName}}</th>
+            <th>{{constituency.constituencyName}}</th>
             }
             <th>Ukupno</th>
           </tr>
@@ -39,9 +40,39 @@
           <tr>
             <td>{{partyResult.party}}</td>
             @for(mandates of partyResult.mandates; track mandates) {
-              <td>{{mandates.mandates}}</td>
+            <td>{{mandates.mandates}}</td>
             }
             <td>{{partyResult.total}}</td>
+          </tr>
+          }
+
+
+        </tbody>
+      </table>
+      <h2>Detalji izbornog modela</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Izborna jedinica</th>
+            <th>Opis izborne jedinice</th>
+            <th>Broj birača</th>
+            <th>Pristupilo glasovanju</th>
+            <th>Glasovalo birača (prema glasačkim listićima)</th>
+            <th>Važećih listića</th>
+            <th>Nevažećih listića</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(simulation of constituenciesFiltered; track simulation;) {
+          <tr>
+            <td>{{simulation.constituencyName}}</td>
+            <td>{{simulation.constituencyDescription}}</td>
+            <td>{{simulation.votingPopulation}}</td>
+            <td>{{simulation.totalVotes}}</td>
+            <td>{{simulation.totalVotesByBallot}}</td>
+            <td>{{simulation.validVotes}}</td>
+            <td>{{simulation.invalidVotes}}</td>
+          </tr>
           }
 
         </tbody>

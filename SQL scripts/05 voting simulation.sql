@@ -68,4 +68,4 @@ GROUP BY
 ORDER by 
 	cs.ConstituencyNumber, SUM(el.TotalVotes) DESC
 
-SELECT * FROM dbo.VotingSimulations
+SELECT * FROM dbo.VotingSimulations ORDER BY SimulationId, ConstituencyNumber, Votes DESC
