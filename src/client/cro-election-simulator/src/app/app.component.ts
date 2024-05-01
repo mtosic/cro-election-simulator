@@ -23,8 +23,8 @@ export class AppComponent {
   simulations: any[] = [];
   calculationMethods: any[] = [
     { id: 1, name: 'D\'Hondt' },
-    { id: 2, name: 'Sainte-Laguë' },
-    { id: 3, name: 'Hare-Niemeyer' }
+    { id: 2, name: 'Sainte-Laguë' }
+    // { id: 3, name: 'Hare-Niemeyer' }
   ];
 
   partyResults: any[] = [];
@@ -34,7 +34,7 @@ export class AppComponent {
   constructor(private simulationService: SimulationService) {
     this.form = new FormGroup({
       simulationId: new FormControl(1),
-      calculationId: new FormControl({ value: 1, disabled: true }),
+      calculationId: new FormControl(1),
       threshold: new FormControl(5)
     });
 
@@ -81,15 +81,29 @@ export class AppComponent {
       let constituencySimulation = this.constituencySimulations.find(constituencySimulation => constituencySimulation.simulationId === votingSimulation.simulationId && constituencySimulation.constituencyId === votingSimulation.constituencyId);
       // console.log(constituencySimulation);
       //calculate number of votes for each mandate by dhont method
-
-      for (let i = 1; i <= constituencySimulation.numberOfMandates; i++) {
-        votes.push({
-          constituencyNumber: votingSimulation.constituencyNumber,
-          party: votingSimulation.partyName,
-          selected: false,
-          total: Math.round(votingSimulation.votes / i),
-        });
+      if (this.form.value.calculationId === 1) {
+        for (let i = 1; i <= constituencySimulation.numberOfMandates; i++) {
+          votes.push({
+            constituencyNumber: votingSimulation.constituencyNumber,
+            party: votingSimulation.partyName,
+            selected: false,
+            total: Math.round(votingSimulation.votes / i),
+          });
+        }
       }
+
+      //calculate number of votes for each mandate by sainte-lague method
+      if (this.form.value.calculationId === 2) {
+        for (let i = 0; i < constituencySimulation.numberOfMandates; i++) {
+          votes.push({
+            constituencyNumber: votingSimulation.constituencyNumber,
+            party: votingSimulation.partyName,
+            selected: false,
+            total: Math.round(votingSimulation.votes / (2 * i + 1)),
+          });
+        }
+      }
+
     });
     // console.log(votes);
     // console.log(this.constituenciesFiltered);
@@ -136,9 +150,9 @@ export class AppComponent {
           mandates: partyVotesCount
         };
       });
-    
+
       let totalMandates = partyConstituencies.reduce((total, current) => total + current.mandates, 0);
-    
+
       return {
         party: party,
         mandates: partyConstituencies,

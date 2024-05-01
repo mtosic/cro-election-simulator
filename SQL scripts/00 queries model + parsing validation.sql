@@ -4,9 +4,24 @@ SELECT * FROM dbo.ElectionLists
 SELECT * FROM dbo.Counties
 SELECT * FROM dbo.PollingStations  --9565
 SELECT * FROM dbo.Parties
-SELECT * FROM dbo.PollingStations
-SELECT * FROM dbo.Cities
+SELECT * FROM dbo.PollingStations where CityId IN (2,105,106)
+SELECT * FROM dbo.Cities where CountyId = 2
 SELECT * FROM dbo.Candidates
+
+--biraèka mjesta u gradu zagrebu
+SELECT city.Name AS CityName, ps.Name, ps.Code, ps.Location, ps.Address, ps.VotingPopulation, ps.TotalVotes, ps.TotalVotesByBallot, ps.ValidVotes, ps.InvalidVotes 
+FROM 
+	dbo.PollingStations ps
+	INNER JOIN dbo.Cities city on city.Id = ps.CityId
+where 
+	CityId IN (2,105,106)
+
+SELECT DISTINCT city.Name AS CityName, ps.Name as PollingStationName
+FROM 
+	dbo.PollingStations ps
+	INNER JOIN dbo.Cities city on city.Id = ps.CityId
+where 
+	CityId IN (2,105,106)
 
 --ukupno glasova
 SELECT
@@ -41,6 +56,8 @@ FROM
 	INNER JOIN dbo.PollingStations ps on el.PollingStationId = ps.Id
 	INNER JOIN dbo.Cities city on ps.CityId = city.Id
 	INNER JOIN dbo.Counties county on county.Id = city.CountyId
+WHERE
+	county.Id = 2
 GROUP BY
 	p.ShortName, county.Name
 ORDER by 
@@ -78,6 +95,92 @@ GROUP BY
 	p.ShortName, const.Name
 ORDER by 
 	SUM(el.TotalVotes) DESC
+
+--verifikacija rezultata za možemo po gè u gradu zagrebu
+SELECT
+	p.ShortName AS PartyName, 
+	city.Name AS CityName, 
+	district.Name AS DistrictName, 
+	SUM(el.TotalVotes) AS TotalVotes
+FROM
+	dbo.ElectionLists el
+	INNER JOIN dbo.Parties p on el.PartyId = p.Id
+	INNER JOIN dbo.PollingStations ps on el.PollingStationId = ps.Id
+	INNER JOIN dbo.Cities city on city.Id = ps.CityId
+	INNER JOIN dbo.CityDistrict district on city.Name = district.ConstituencyName AND district.PollingStationCode = ps.Code
+WHERE
+	p.ShortName = 'MOŽEMO' AND ConstituencyId IN (1) AND CityId IN (2,105,106) --2 je 2, 6 je 6 -- 45831 je I IJ, 40389 glasova u IJ i Gradu Zagrebu
+GROUP BY
+	p.ShortName, city.Name, district.Name
+ORDER by 
+	SUM(el.TotalVotes) DESC
+
+--verifikacija rezultata po gè u gradu zagrebu
+SELECT
+	p.ShortName AS PartyName, 
+	city.Name AS CityName, 
+	district.Name AS DistrictName, 
+	SUM(el.TotalVotes) AS TotalVotes
+FROM
+	dbo.ElectionLists el
+	INNER JOIN dbo.Parties p on el.PartyId = p.Id
+	INNER JOIN dbo.PollingStations ps on el.PollingStationId = ps.Id
+	INNER JOIN dbo.Cities city on city.Id = ps.CityId
+	INNER JOIN dbo.CityDistrict district on city.Name = district.CityName AND district.PollingStationCode = ps.Code AND ps.ConstituencyId = district.ConstituencyId
+WHERE
+	ConstituencyId IN (1,2,6) AND CityId IN (2,105,106) --2 je 2, 6 je 6 -- 45831 je I IJ, 40389 glasova u IJ i Gradu Zagrebu
+GROUP BY
+	p.ShortName, city.Name, district.Name
+ORDER by 
+	SUM(el.TotalVotes) DESC
+
+--verifikacija glasova za M! u IJ
+SELECT
+	p.ShortName AS PartyName, 
+	city.Name AS CityName, 
+	district.Name AS DistrictName, 
+	SUM(el.TotalVotes) AS TotalVotes
+FROM
+	dbo.ElectionLists el
+	INNER JOIN dbo.Parties p on el.PartyId = p.Id
+	INNER JOIN dbo.PollingStations ps on el.PollingStationId = ps.Id
+	INNER JOIN dbo.Cities city on city.Id = ps.CityId
+	INNER JOIN dbo.CityDistrict district on city.Name = district.ConstituencyName AND district.PollingStationCode = ps.Code
+WHERE
+	p.ShortName = 'MOŽEMO' AND ConstituencyId IN (1) AND CityId IN (2) --2 je 2, 6 je 6 -- 45831 je I IJ, 40389 glasova u IJ i Gradu Zagrebu
+GROUP BY
+	p.ShortName, city.Name, district.Name
+ORDER by 
+	SUM(el.TotalVotes) DESC
+
+--verifikacija rezultata za možemo po MO u gradu zagrebu
+SELECT
+	p.ShortName AS PartyName, 
+	city.Name AS CityName, 
+	ps.Name AS PollingStationName, 
+	SUM(el.TotalVotes) AS TotalVotes
+FROM
+	dbo.ElectionLists el
+	INNER JOIN dbo.Parties p on el.PartyId = p.Id
+	INNER JOIN dbo.PollingStations ps on el.PollingStationId = ps.Id
+	INNER JOIN dbo.Cities city on city.Id = ps.CityId
+WHERE
+	CityId IN (2,105,106) --2 je 2, 6 je 6 -- 45831 je I IJ, 40389 glasova u IJ i Gradu Zagrebu
+GROUP BY
+	p.ShortName, city.Name, ps.Name
+ORDER by 
+	SUM(el.TotalVotes) DESC
+
+--koja BM fale
+SELECT
+*
+FROM
+	dbo.PollingStations ps
+	INNER JOIN dbo.Cities city on ps.CityId = city.Id
+	LEFT JOIN dbo.CityDistrict district on city.Name = district.ConstituencyName AND district.PollingStationCode = ps.Code
+WHERE
+	ps.CityId = 2
+	AND district.Name IS NULL
 
 --broj biraèkih mjesta van inozemstva
 SELECT *
